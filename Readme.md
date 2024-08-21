@@ -172,7 +172,7 @@ The detailed code structure and functions are as follows:
 - Code: src/cesm2_random_storms/aorc_field_matching/create_long_term_era_fields.py
 - Function: Create long-term 1979-2021 ERA5 covariate and AORC fields for matching
 
-4.2 Calculate empirial lag-1 autocorrelation field based on AORC data (08/20/2024 update)
+4.2 Calculate empirial lag-1 autocorrelation field based on AORC data (**08/20/2024 update**)
 - Code: src/cesm2_random_storms/aorc_field_matching/extract_lag_one_acf_from_AORC.py
 - Function: Create lag-1 autocorrelation field based on AORC data
 
