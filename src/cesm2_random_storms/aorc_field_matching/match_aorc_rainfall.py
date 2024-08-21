@@ -33,6 +33,7 @@ def extract_match_aorc_rainfall_index(ensemble_year, ensemble_id):
     era_ar_tcwv_array_list = np.load(save_location + "/" + "era_ar_tcwv_array.npy")
     era_ar_ivt_array_list = np.load(save_location + "/" + "era_ar_ivt_array.npy")
     era_ar_aorc_array_list = np.load(save_location + "/" + "era_ar_aorc_array.npy")
+    era_ar_aorc_acf_array_list = np.load(save_location + "/" + "era_ar_aorc_acf_array.npy") # the lag-1 autocorrelation field
 
     # era_ar_u_array_list = np.load(save_location + "/" + "era_ar_u_array.npy")
     # era_ar_v_array_list = np.load(save_location + "/" + "era_ar_v_array.npy")
@@ -105,6 +106,7 @@ def extract_match_aorc_rainfall_index(ensemble_year, ensemble_id):
             # v_array = v850_xarray['v850'].data
 
             match_aorc_array_list = []
+            match_acf_array_list = []
 
             # get a current precipitation array
             for time_index in range(mtpr_array.shape[0]):
@@ -139,13 +141,23 @@ def extract_match_aorc_rainfall_index(ensemble_year, ensemble_id):
                 match_aorc_array = era_ar_aorc_array_list[random_sample_index]
                 match_aorc_array_list.append(match_aorc_array)
 
+                # get the aorc lag-1 autocorrelation field at corresponding index
+                match_acf_array = era_ar_aorc_acf_array_list[random_sample_index]
+                match_acf_array_list.append(match_acf_array)
+
             match_aorc_array_list = np.array(match_aorc_array_list)
+            match_acf_array_list = np.array(match_acf_array_list)
 
             # save the aorc rainfall
             np.save(
                 rainfall_save_folder + "/" + "{0}_sr_rainfall.npy".format(
                     ar_id), match_aorc_array_list)
 
+            # save the aorc acf field
+            np.save(
+                rainfall_save_folder + "/" + "{0}_acf_rainfall.npy".format(
+                    ar_id), match_aorc_array_list
+            )
 
 def run_task(task):
 

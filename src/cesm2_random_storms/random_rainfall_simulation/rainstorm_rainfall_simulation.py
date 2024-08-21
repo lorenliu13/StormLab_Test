@@ -18,6 +18,79 @@ def create_folder(folder_name):
         pass
 
 
+def rainfall_generation(noise_array, logic_mu_array, scipy_a_array,
+                        scipy_scale_array, gg_c_array, high_res_mtpr_array):
+
+    # convert the gaussian noise field to 0-1 field
+    first_prob_array = st.norm.cdf(noise_array, loc=0, scale=1)
+
+    print('Start to calculate prob field.')
+    # del noise_array
+    # gc.collect()
+
+    # replace nan with zero
+    logic_mu_array = np.where(np.isnan(logic_mu_array), 0, logic_mu_array)
+    # compute the probability of dry
+    dry_prob_array = 1 - logic_mu_array
+
+    # Compute the second probability
+    second_prob_array = first_prob_array - dry_prob_array
+    # change all negative probability to np.nan
+    second_prob_array = np.where((second_prob_array < 0) | (dry_prob_array == 1), np.nan, second_prob_array)
+    # print(second_prob_array[second_prob_array > 1])
+    # rescale the remaining to (0, 1)
+    second_prob_array = second_prob_array / logic_mu_array
+
+    # force the second prob to be zero if cesm2 is < 0.01
+    second_prob_array = np.where(high_res_mtpr_array > 0.01, second_prob_array, 0)
+
+    # add an upper bound for probability
+    # second_prob_array[second_prob_array > 0.9995] = 0.9995
+
+    # clear memory
+    # del first_prob_array, logic_mu_array, dry_prob_array
+    # gc.collect()
+
+    sim_rainfall_array = np.zeros(scipy_scale_array.shape)
+
+    print('Start to calculate rainfall field.')
+    # compute ppf for each time step
+    for time_index in range(scipy_scale_array.shape[0]):
+        # time_index = 0
+
+        curr_second_prob_array = second_prob_array[time_index]
+        # get those rainfall probability > 0
+        rainfall_mask = ~np.isnan(curr_second_prob_array)
+
+        curr_a_array = scipy_a_array[time_index]
+        # curr_c_array = scipy_gg_c_array
+        curr_scale_array = scipy_scale_array[time_index]
+
+        # get the corresponding GG distribution params
+        p = curr_second_prob_array[rainfall_mask]
+
+        # get the rainfall magnitude through inverse pdf
+        # an nan appears when p > 1
+        rainfall_magnitude_vector = st.gamma.ppf(p, a=curr_a_array[rainfall_mask],
+                                                 scale=curr_scale_array[rainfall_mask]
+                                                 ) ** (1 / gg_c_array[rainfall_mask])
+        rainfall_magnitude_vector[np.isnan(rainfall_magnitude_vector)] = 0
+        rainfall_magnitude_vector[np.isinf(rainfall_magnitude_vector)] = 0
+
+        # print(np.sum(np.isnan(rainfall_magnitude_vector)))
+        # restore the rainfall to original location
+        rainfall_array = np.zeros(curr_second_prob_array.shape)
+        rainfall_array[rainfall_mask] = rainfall_magnitude_vector
+
+        sim_rainfall_array[time_index, :, :] = rainfall_array
+
+    # # clear memory
+    # del scipy_a_array, scipy_scale_array, scipy_gg_c_array
+    # gc.collect()
+
+    return sim_rainfall_array
+
+
 if __name__ == "__main__":
 
     # Determine the directory of the current script
@@ -43,7 +116,6 @@ if __name__ == "__main__":
     logic_mu_xarray = xr.load_dataset(cesm_rainstorm_distr_param_folder + "/" + "{0}_logit_wet_p.nc".format(ar_id))
     # load scipy parameters
     scipy_a_xarray = xr.load_dataset(cesm_rainstorm_distr_param_folder + "/" + "{0}_scipy_a.nc".format(ar_id))
-    scipy_gg_c_xarray = xr.load_dataset(cesm_rainstorm_distr_param_folder + "/" + "{0}_scipy_c.nc".format(ar_id))
     scipy_scale_xarray = xr.load_dataset(cesm_rainstorm_distr_param_folder + "/" + "{0}_scipy_scale.nc".format(ar_id))
     # scipy_loc_xarray = xr.load_dataset("{0}_scipy_loc.nc".format(ar_id))
 
@@ -53,7 +125,6 @@ if __name__ == "__main__":
     # get GG and logistic regression model parameters
     logic_mu_array = logic_mu_xarray['aorc'].data
     scipy_a_array = scipy_a_xarray['aorc'].data
-    scipy_gg_c_array = scipy_gg_c_xarray['aorc'].data
     scipy_scale_array = scipy_scale_xarray['aorc'].data
     # scipy_loc_array = scipy_loc_xarray['aorc'].data
 
@@ -76,7 +147,7 @@ if __name__ == "__main__":
     second_prob_array = second_prob_array / logic_mu_array
 
     # add an upper bound for probability
-    second_prob_array[second_prob_array > 0.995] = 0.995
+    # second_prob_array[second_prob_array > 0.995] = 0.995
     # print(second_prob_array[second_prob_array > 1])
 
 
@@ -101,7 +172,7 @@ if __name__ == "__main__":
         # an nan appears when p > 1
         rainfall_magnitude_vector = st.gamma.ppf(p, a=curr_a_array[rainfall_mask],
                                                  scale=curr_scale_array[rainfall_mask]
-                                                 ) ** (1 / curr_c_array[rainfall_mask])
+                                                 )
         rainfall_magnitude_vector[np.isnan(rainfall_magnitude_vector)] = 0
         rainfall_magnitude_vector[np.isinf(rainfall_magnitude_vector)] = 0
 
