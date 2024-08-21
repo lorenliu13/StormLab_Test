@@ -54,21 +54,27 @@ Required packages are listed in requirements.txt
 	- Generate CESM2 atmospheric variable fields for CESM2 rainstorms
 	  
 		`python src/cesm2_random_storms/extract_rainstorm_events/extract_cesm2_rainstorm_covariate_fields.py`
+    - Calculate empirical lag-1 autocorrelation fields for AORC rainfall fields (08/20/2024 update)
+      
+		`python src/cesm2_random_storms/aorc_field_matching/extract_lag_one_acf_from_AORC.py`
 4. Generate ERA5-AORC dataframe at each grid cell and perform distribution fitting
 	- Generate ERA5-AORC dataframe at each grid cell
 	  
 		`python src/era5_random_storms/monthly_distribution_fitting/generate_monthly_fitting_dataframe_at_each_grid.py`
-	- Distribution fitting
+	- Distribution fitting (08/20/2024 update)
 	  
-		`python src/era5_random_storms/monthly_distribution_fitting/fit_distribution_by_batch.py`
+		`python src/era5_random_storms/monthly_distribution_fitting/fit_CSGD_at_aorc_grid_by_batch.py`
 5. Simulate stochastic rainstorm based on CESM2 data
-	- Generate 2D random Gaussian noise fields
+	- Match AORC field and associated lag-1 autocorrelation field (08/20/2024 update)
+      
+		`python src/cesm2_random_storms/aorc_field_matching/match_aorc_rainfall.py`
+    - Generate 2D random Gaussian noise fields (08/20/2024 update)
 	  
-		`python src/cesm2_random_storms/noise_generation/rainstorm_noise_generation.py`
-	- Generate parameter fields of conditional rainfall distributions
+		`python src/cesm2_random_storms/noise_generation/fft_code.py`
+	- Generate parameter fields of conditional rainfall distributions (08/20/2024 update)
 	  
-		`python src/cesm2_random_storms/conditional_distribution_parameter_fields/distribution_param_field_for_rainstorm_event.py`
-	- Generate stochastic rainstorm fields
+		`python src/cesm2_random_storms/conditional_distribution_parameter_fields/tngd_param_field.py`
+	- Generate stochastic rainstorm fields (08/20/2024 update)
 	  
 		`python src/cesm2_random_storms/random_rainfall_simulation/rainstorm_rainfall_simulation.py`
 	
@@ -152,12 +158,12 @@ The detailed code structure and functions are as follows:
 - Code: src/era5_random_storms/monthly_distribution_fitting/generate_monthly_fitting_dataframe_at_each_grid.py
 - Function: Generate a dataframe containing long-term series of ERA5 covariates or AORC rainfall at 1000 grid cells. This separates the 1024\*630 grids into batches of 1,000 grids. The fitting will be performed based on batches (loop through grids in a batch) rather than single grid by single grid to improve speed. 
 
-3.2 Monthly Fitting
-- Code: src/era5_random_storms/monthly_distribution_fitting/fit_distribution_by_batch.py
+3.2 Monthly Fitting (08/20/2024 update)
+- Code: src/era5_random_storms/monthly_distribution_fitting/fit_CSGD_at_aorc_grid_by_batch.py
 - Function: Load the dataframe for the current batch (containing 1,000 grids time series of ERA5 variables or AORC rainfall). Perform distribution fitting for each grid in the batch. 
 
-3.3 Parameter Fields
-- Code: src/era5_random_storms/monthly_distribution_fitting/generate_distribution_parameter_array.py
+3.3 Parameter Fields (08/20/2024 update)
+- Code: src/era5_random_storms/monthly_distribution_fitting/generate_distribution_param_seasonal.py
 - Function: Generate the fitted distribution parameter coefficient fields.  
 
 **AORC Rainfall Matching**
@@ -166,21 +172,25 @@ The detailed code structure and functions are as follows:
 - Code: src/cesm2_random_storms/aorc_field_matching/create_long_term_era_fields.py
 - Function: Create long-term 1979-2021 ERA5 covariate and AORC fields for matching
 
-4.2 AORC Rainfall Matching
+4.2 Calculate empirial lag-1 autocorrelation field based on AORC data (08/20/2024 update)
+- Code: src/cesm2_random_storms/aorc_field_matching/extract_lag_one_acf_from_AORC.py
+- Function: Create lag-1 autocorrelation field based on AORC data
+
+4.3 AORC Rainfall Matching (08/20/2024 update)
 - Code: src/cesm2_random_storms/aorc_field_matching/match_aorc_rainfall.py
-- Function: Sample the AORC fields for each CESM2 rainstorms based on k nearest neighbor method. 
+- Function: Sample the AORC fields and associated lag-1 autocorrelation fields for each CESM2 rainstorms based on k nearest neighbor method. 
 
 **CESM2 Rainstorm Simulation**
 
-5.1 Noise Generation
-- Code: src/cesm2_random_storms/noise_generation/rainstorm_noise_generation.py
+5.1 Noise Generation (08/20/2024 update)
+- Code: src/cesm2_random_storms/noise_generation/fft_code.py
 - Function: Generate space-time noise fields for each CESM2 rainstorm events.
 
-5.2 Distribution Parameter Fields
-- Code: src/cesm2_random_storms/conditional_distribution_parameter_fields/distribution_param_field_for_rainstorm_event.py
+5.2 Distribution Parameter Fields (08/20/2024 update)
+- Code: src/cesm2_random_storms/conditional_distribution_parameter_fields/tngd_param_field.py
 - Function: Generate conditional distribution parameter fields based on fitted coefficients and CESM2 large-scale atmospheric variable fields. 
 
-5.3 Stochastic Rainfall Simulation
+5.3 Stochastic Rainfall Simulation (08/20/2024 update)
 - Code: src/cesm2_random_storms/random_rainfall_simulation/rainstorm_rainfall_simulation.py
 - Function: Generate simulated rainfall fields based on noise and conditional distribution parameter fields. 
 
