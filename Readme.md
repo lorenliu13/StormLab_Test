@@ -61,20 +61,20 @@ Required packages are listed in requirements.txt
 	- Generate ERA5-AORC dataframe at each grid cell
 	  
 		`python src/era5_random_storms/monthly_distribution_fitting/generate_monthly_fitting_dataframe_at_each_grid.py`
-	- Distribution fitting (08/20/2024 update)
+	- Distribution fitting (**08/20/2024 update**)
 	  
 		`python src/era5_random_storms/monthly_distribution_fitting/fit_CSGD_at_aorc_grid_by_batch.py`
 5. Simulate stochastic rainstorm based on CESM2 data
-	- Match AORC field and associated lag-1 autocorrelation field (08/20/2024 update)
+	- Match AORC field and associated lag-1 autocorrelation field (**08/20/2024 update**)
       
 		`python src/cesm2_random_storms/aorc_field_matching/match_aorc_rainfall.py`
-    - Generate 2D random Gaussian noise fields (08/20/2024 update)
+    - Generate 2D random Gaussian noise fields (**08/20/2024 update**)
 	  
 		`python src/cesm2_random_storms/noise_generation/fft_code.py`
-	- Generate parameter fields of conditional rainfall distributions (08/20/2024 update)
+	- Generate parameter fields of conditional rainfall distributions (**08/20/2024 update**)
 	  
 		`python src/cesm2_random_storms/conditional_distribution_parameter_fields/tngd_param_field.py`
-	- Generate stochastic rainstorm fields (08/20/2024 update)
+	- Generate stochastic rainstorm fields (**08/20/2024 update**)
 	  
 		`python src/cesm2_random_storms/random_rainfall_simulation/rainstorm_rainfall_simulation.py`
 	
@@ -158,11 +158,11 @@ The detailed code structure and functions are as follows:
 - Code: src/era5_random_storms/monthly_distribution_fitting/generate_monthly_fitting_dataframe_at_each_grid.py
 - Function: Generate a dataframe containing long-term series of ERA5 covariates or AORC rainfall at 1000 grid cells. This separates the 1024\*630 grids into batches of 1,000 grids. The fitting will be performed based on batches (loop through grids in a batch) rather than single grid by single grid to improve speed. 
 
-3.2 Monthly Fitting (08/20/2024 update)
+3.2 Monthly Fitting (**08/20/2024 update**)
 - Code: src/era5_random_storms/monthly_distribution_fitting/fit_CSGD_at_aorc_grid_by_batch.py
 - Function: Load the dataframe for the current batch (containing 1,000 grids time series of ERA5 variables or AORC rainfall). Perform distribution fitting for each grid in the batch. 
 
-3.3 Parameter Fields (08/20/2024 update)
+3.3 Parameter Fields (**08/20/2024 update**)
 - Code: src/era5_random_storms/monthly_distribution_fitting/generate_distribution_param_seasonal.py
 - Function: Generate the fitted distribution parameter coefficient fields.  
 
@@ -176,21 +176,21 @@ The detailed code structure and functions are as follows:
 - Code: src/cesm2_random_storms/aorc_field_matching/extract_lag_one_acf_from_AORC.py
 - Function: Create lag-1 autocorrelation field based on AORC data
 
-4.3 AORC Rainfall Matching (08/20/2024 update)
+4.3 AORC Rainfall Matching (**08/20/2024 update**)
 - Code: src/cesm2_random_storms/aorc_field_matching/match_aorc_rainfall.py
 - Function: Sample the AORC fields and associated lag-1 autocorrelation fields for each CESM2 rainstorms based on k nearest neighbor method. 
 
 **CESM2 Rainstorm Simulation**
 
-5.1 Noise Generation (08/20/2024 update)
+5.1 Noise Generation (**08/20/2024 update**)
 - Code: src/cesm2_random_storms/noise_generation/fft_code.py
 - Function: Generate space-time noise fields for each CESM2 rainstorm events.
 
-5.2 Distribution Parameter Fields (08/20/2024 update)
+5.2 Distribution Parameter Fields (**08/20/2024 update**)
 - Code: src/cesm2_random_storms/conditional_distribution_parameter_fields/tngd_param_field.py
 - Function: Generate conditional distribution parameter fields based on fitted coefficients and CESM2 large-scale atmospheric variable fields. 
 
-5.3 Stochastic Rainfall Simulation (08/20/2024 update)
+5.3 Stochastic Rainfall Simulation (**08/20/2024 update**)
 - Code: src/cesm2_random_storms/random_rainfall_simulation/rainstorm_rainfall_simulation.py
 - Function: Generate simulated rainfall fields based on noise and conditional distribution parameter fields. 
 
