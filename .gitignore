@@ -10,3 +10,12 @@ output/
 
 # Ignore the .npy file
 .npy
+
+# Ignore the nc file
+.nc
+
+# Ingore the csv file
+.csv
+
+# Ignore the tar file
+.rar
